@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Balık Besleme ve Yem Teknolojisi - Mobil Pro Sınav</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f4f8;
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            margin: 0;
+            padding: 15px;
+            box-sizing: border-box;
+        }
+        .quiz-container {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            max-width: 800px;
+            width: 100%;
+            margin-top: 10px;
+        }
+        h2 {
+            margin-top: 0;
+            color: #2c3e50;
+            font-size: 1.1rem;
+            line-height: 1.5;
+            font-weight: 600;
+        }
+        .status {
+            font-size: 0.9rem;
+            color: #7f8c8d;
+            margin-bottom: 15px;
+            font-weight: bold;
+            border-bottom: 2px solid #ecf0f1;
+            padding-bottom: 10px;
+        }
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .option-btn {
+            padding: 15px;
+            font-size: 1rem;
+            text-align: left;
+            background-color: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.1s ease;
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+        }
+        
+        @media (hover: hover) {
+            .option-btn:hover:not(:disabled) {
+                background-color: #e2e6ea;
+                border-color: #ced4da;
+            }
+        }
+
+        .option-btn:active:not(:disabled) {
+            transform: scale(0.98);
+            background-color: #e2e6ea;
+        }
+
+        .option-btn:disabled {
+            cursor: not-allowed;
+            color: #333;
+        }
+        .option-btn.correct {
+            background-color: #d4edda !important;
+            border-color: #28a745 !important;
+            color: #155724 !important;
+            font-weight: bold;
+        }
+        .option-btn.wrong {
+            background-color: #f8d7da !important;
+            border-color: #dc3545 !important;
+            color: #721c24 !important;
+        }
+        .next-btn {
+            margin-top: 20px;
+            padding: 15px 25px;
+            font-size: 1rem;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            width: 100%;
+            display: none;
+            font-weight: bold;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .next-btn:active {
+            transform: scale(0.98);
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="quiz-container">
+        <div id="status" class="status">Soru: 1 / ?</div>
+        <h2 id="question">Soru metni buraya gelecek</h2>
+        <div id="options" class="options"></div>
+        <button id="nextBtn" class="next-btn" onclick="nextQuestion()">Sonraki Soru ➔</button>
+    </div>
+
+    <script>
+        const quizData = [
+            {q: "SORU-1 (balik_besleme_ve_yem_teknolojisi.pdf): Zootekni biliminde hayvanların doğru ve dengeli beslenmesi, temel olarak hangi iki ana amaca hizmet etmektedir?", o: ["A) Doğal stokları korumak ve su kirliliğini önlemek", "B) Maksimum verim elde etmek ve ekonomik optimizasyon sağlamak", "C) Hastalıkları tamamen yok etmek ve canlı ağırlığı sabit tutmak", "D) İşletme giderlerini artırmak ve genetik çeşitliliği azaltmak"], c: 1},
+            {q: "SORU-2 (balik_besleme_ve_yem_teknolojisi.pdf): Ticari balık çiftliklerinde toplam işletme giderlerinin %60 ile %70'ini yem maliyetleri oluşturur. Metne göre, işletmelerde karşılaşılan gelişim geriliklerinin ve ölümlerin birinci sıradaki ana nedeni aşağıdakilerden hangisidir?", o: ["A) Su sıcaklığındaki doğal mevsimsel dalgalanmalar", "B) İşletme personelinin yetersizliği", "C) Besleme hataları veya rasyon dengesizlikleri", "D) Genetik mutasyonlar"], c: 2},
+            {q: "SORU-3 (balik_besleme_ve_yem_teknolojisi.pdf): Yüksek proteinli soya küspesi veya balık unu gibi zengin içerikli hammaddeler rasyonlarda sınırsızca kullanılamazlar. Aşağıdakilerden hangisi bir hammaddenin aşırı kullanımı durumunda ortaya çıkabilecek sindirim ve metabolizma bozukluklarından biri olarak metinde yer almaz?", o: ["A) İshal", "B) Gaz oluşumu (Timpani)", "C) Karaciğer yağlanması", "D) Solungaç erimesi"], c: 3},
+            {q: "SORU-4 (balik_besleme_ve_yem_teknolojisi.pdf): Akuakültür faaliyetleri yapıldığı suyun niteliğine göre üç ana kategoriye ayrılmaktadır. Aşağıdakilerden hangisi metinde belirtilen bu üç ana kategoriden biridir?", o: ["A) Sadece Okyanus Balıkçılığı", "B) Kıyı Balıkçılığı", "C) Kapalı Devre Sistemler", "D) Açık Deniz Kafes Sistemleri"], c: 1},
+            {q: "SORU-5 (balik_besleme_ve_yem_teknolojisi.pdf): Aşağıdaki yetiştiricilik sistemlerini doğru tanımlarıyla eşleştiriniz.<br><br>I. Kuluçkalık (Hatchery) Sistemi<br>II. Genç Balık Yakalama (Besicilik) Sistemi<br>III. Komple (Tam) Yetiştirme Sistemi<br><br>a) Kuluçkadan pazara kadar tüm sürecin kontrol altında olduğu sistemdir.<br>b) Doğadan yakalanan juvenil (genç) balıkların pazar boyuna gelene kadar beslendiği sistemdir.<br>c) Yumurtaların kuluçkalanması ve larvaların beslendiği sistemdir.", o: ["A) I-c, II-b, III-a", "B) I-a, II-b, III-c", "C) I-b, II-a, III-c", "D) I-c, II-a, III-b"], c: 0},
+            {q: "SORU-6 (balik_besleme_ve_yem_teknolojisi.pdf): Küresel gıda arzı dikkate alındığında balıkların insan beslenmesindeki oransal katkılarıyla ilgili aşağıda verilen değerlerden hangisi yanlıştır?", o: ["A) İnsan beslenmesinde toplam enerjinin %1'ini sağlarlar.", "B) İnsan beslenmesinde toplam proteinin %5'ini sağlarlar.", "C) İnsan beslenmesinde hayvansal proteinin %14'ünü sağlarlar.", "D) İnsan beslenmesinde toplam karbonhidratın %20'sini sağlarlar."], c: 3},
+            {q: "SORU-7 (balik_besleme_ve_yem_teknolojisi.pdf): Balıklardaki Yem Dönüşüm Oranı (FCR) ile kanatlılardaki (etlik piliç) FCR değerlerinin karşılaştırması aşağıdakilerin hangisinde doğru verilmiştir?", o: ["A) Balıklarda 1.5 - 1.7 iken, kanatlılarda 1.9 - 2.0 seviyelerindedir.", "B) Balıklarda 1.9 - 2.0 iken, kanatlılarda 1.5 - 1.7 seviyelerindedir.", "C) Balıklarda 2.5 - 3.0 iken, kanatlılarda 1.0 - 1.2 seviyelerindedir.", "D) Her iki canlı grubunda da FCR değeri ortalama 1.5'tir."], c: 0},
+            {q: "SORU-8 (balik_besleme_ve_yem_teknolojisi.pdf): Balıkların yemi canlı ağırlığa çok daha verimli (düşük FCR) dönüştürmelerinin temel fizyolojik nedeni aşağıdakilerden hangisidir?", o: ["A) Sadece etçil (karnivor) beslenmeleri", "B) Soğukkanlı (poikiloterm) olmaları sebebiyle vücut ısılarını sabit tutmak için enerji harcamamaları ve yerçekimine karşı direnç göstermemeleri", "C) Gelişmiş bir sindirim enzimi sistemine sahip olmaları", "D) Oksijeni solungaçları ile daha yüksek kapasitede filtrelemeleri"], c: 1},
+            {q: "SORU-9 (balik_besleme_ve_yem_teknolojisi.pdf): Balıkların soğukkanlı (poikiloterm) olmaları, enerji tasarrufu sağlamak gibi büyük bir avantaja sahip olsa da beraberinde ciddi bir dezavantaj getirmektedir. Metinde belirtilen bu dezavantaj aşağıdakilerden hangisidir?", o: ["A) Yemdeki karbonhidratları hiçbir şekilde sindirememeleri", "B) Üreme hızlarının sıcak kanlı hayvanlara göre çok yavaş olması", "C) Su sıcaklığındaki ani değişimlere ve çevresel stres faktörlerine karşı aşırı hassas olmaları", "D) Sadece gün ışığında beslenebilmeleri"], c: 2},
+            {q: "SORU-10 (balik_besleme_ve_yem_teknolojisi.pdf): Akuakültürde türler optimum gelişme gösterdikleri su sıcaklıklarına göre ikiye ayrılır. Aşağıdaki tür ve sıcaklık eşleştirmelerinden hangisi yanlıştır?", o: ["A) Alabalık (Trout) - Soğuk Su Balığı", "B) Somon (Salmon) - Soğuk Su Balığı", "C) Sazan (Carp) - Ilık/Sıcak Su Balığı", "D) Kanal Yayını (Catfish) - Soğuk Su Balığı"], c: 3},
+            {q: "SORU-11 (balik_besleme_ve_yem_teknolojisi.pdf): Balık etinin tüketiminin artmasının temel nedenleri arasında aşağıdakilerden hangisi gösterilmez?", o: ["A) Esansiyel Omega-3 ve Omega-6 yağ asitlerini içermesi", "B) Toplam hayvansal protein tüketimi içerisindeki payının %16.6'ya ulaşması", "C) Sadece okyanuslarda avlanan türlerin yüksek vitamin/mineral barındırması", "D) Yüksek kaliteli protein kaynağı olması"], c: 2},
+            {q: "SORU-12 (balik_besleme_ve_yem_teknolojisi.pdf): Doğal stokların azalmasıyla birlikte birçok ülkenin avcılık desteklerini kısıtlayarak su ürünleri yetiştiriciliğini teşvik etmesinin ekonomik/sosyal gerekçesi aşağıdakilerden hangisidir?", o: ["A) Tüm ülkelerin balık unu üretiminde dışa bağımlılığını sıfıra indirmesi", "B) Sektörü bir istihdam kapısı olarak görmeleri ve işsizliği azaltmayı amaçlamaları", "C) Doğadan avlanan balıkların tüketiminin sağlık açısından yasaklanması", "D) Tatlı su balıklarının daha ucuza yetiştirilmesi"], c: 1},
+            {q: "SORU-13 (balik_besleme_ve_yem_teknolojisi.pdf): Metne göre aşağıdaki balık türleri ve yetiştirildikleri su ortamı eşleştirmelerinden hangisi yanlıştır?", o: ["A) Alabalık ve Salmon - Tatlı Su", "B) Sazan ve Tilapia - Tatlı Su", "C) Çipura ve Levrek - Deniz (Tuzlu Su)", "D) Kalkan ve Orkinos - Tatlı Su"], c: 3},
+            {q: "SORU-14 (balik_besleme_ve_yem_teknolojisi.pdf): Balık unu tüketiminde son 30 yılda yaşanan sektörel değişimle ilgili aşağıdaki istatistiksel karşılaştırmalardan hangisi doğrudur?", o: ["A) 1980'lerde en büyük tüketici su ürünleri sektörü iken, günümüzde kanatlı sektörüdür.", "B) 1980'lerde kanatlı sektörü %41 ile en büyük tüketici iken, 2010 sonrasında %58'lik pay ile aslan payını su ürünleri sektörü almıştır.", "C) Domuz yetiştiriciliğinin balık unu kullanım payı sürekli artış göstermiştir.", "D) 2010 sonrasında balık ununun en büyük tüketicisi domuz yetiştiriciliği sektörüdür."], c: 1},
+            {q: "SORU-15 (balik_besleme_ve_yem_teknolojisi.pdf): Aşağıdaki coğrafi bölgeler ve balık unu üretimi için avlanan temel balık türlerini doğru eşleştiriniz.<br><br>I. Peru ve Şili<br>II. ABD<br>III. Norveç ve İzlanda<br><br>a) Ringa ve Capelin<br>b) Menhaden<br>c) Hamsi ve İstavrit", o: ["A) I-c, II-b, III-a", "B) I-a, II-b, III-c", "C) I-b, II-a, III-c", "D) I-c, II-a, III-b"], c: 0},
+            {q: "SORU-16 (balik_besleme_ve_yem_teknolojisi.pdf): Balık unu arzının kısıtlanması ve fiyatların yükselmesi, yem sanayicilerini hangi temel stratejiye yöneltmiştir?", o: ["A) Balık yağının rasyonlardaki kullanım oranını sıfırlamaya", "B) Maliyetleri düşürmek için Soya, Ayçiçeği ve Mısır gibi bitkisel protein kaynaklarına yönelmeye", "C) Sadece yüksek fiyatlı deniz balıklarının yetiştiriciliğini yapmaya", "D) Yem formülasyonlarında sadece Peru menşeli balık unlarını kullanmaya"], c: 1},
+            {q: "SORU-17 (balik_besleme_ve_yem_teknolojisi.pdf): 2011 küresel su ürünleri üretimi verilerine göre, dünya yetiştiricilik sektöründeki kıtasal hakimiyet durumu aşağıdakilerden hangisidir?", o: ["A) Asya ülkeleri %89.02'sini karşılamakta olup, sadece Çin küresel üretimin %61.35'ini sağlamaktadır.", "B) Avrupa Birliği ve Norveç üretimin yarısından fazlasını karşılamaktadır.", "C) Asya ülkeleri net ithalatçı konumundadır.", "D) ABD dünya su ürünleri yetiştiriciliğinin mutlak hakimidir."], c: 0},
+            {q: "SORU-18 (balik_besleme_ve_yem_teknolojisi.pdf): Türkiye'de su ürünleri sektörünün gelişimi ve üretim/tüketim verileri dikkate alındığında, karşılaşılan temel sorun aşağıdakilerden hangisidir?", o: ["A) Hiçbir yeni balık türünün kültüre alınamaması", "B) Yem sanayisinin büyüme hızının üretim hızının gerisinde kalması", "C) Üretim hızla artmasına rağmen, kişi başı balık tüketiminin 7.5 kg'dan 6.3 kg'a gerilemesi", "D) Sektördeki üretimin tamamının sadece Gökkuşağı Alabalığı'ndan oluşması"], c: 2},
+            {q: "SORU-19 (balik_besleme_ve_yem_teknolojisi.pdf): Türkiye'nin 2011 yılı yetiştiricilik üretiminde en yüksek paya sahip olan (baskın) balık türü aşağıdakilerden hangisidir?", o: ["A) Levrek", "B) Çipura", "C) Gökkuşağı Alabalığı", "D) Sazan"], c: 2},
+            {q: "SORU-20 (balik_besleme_ve_yem_teknolojisi.pdf): Yemlerin tanımı yapılırken vurgulanan 'kullanım sınırları' (inklüzyon oranları) kavramı neden kritik bir öneme sahiptir?", o: ["A) Hammaddelerin piyasa fiyatlarının sürekli dalgalanması nedeniyle", "B) Bir hammadde zengin olsa bile, içerdiği anti-nutrisyonel faktörler veya toksik bileşikler nedeniyle sınırsızca kullanılamayacağı için", "C) Hayvanların sürekli aynı yemi tüketmekten sıkılmalarını engellemek için", "D) Tek mideli hayvanların aşırı protein yüklemesini kaldıramaması nedeniyle"], c: 1},
+            {q: "SORU-21 (balik_besleme_ve_yem_teknolojisi.pdf): Yemin kalitesini belirleyen yöntemleri doğru eşleştiriniz.<br><br>I. Fiziksel Değerlendirme<br>II. Kimyasal (Weende) Değerlendirme<br>III. Biyolojik Değerlendirme<br>IV. Mikrobiyolojik Değerlendirme<br><br>a) Duyusal organlarla incelenmesidir.<br>b) Zararlı bakteri ve toksin tespiti.<br>c) Hayvanın tükettiği ile atılan kısmı arasındaki sindirilebilirlik farkıdır.<br>d) Protein, yağ gibi besin maddelerinin laboratuvar saptamasıdır.", o: ["A) I-c, II-d, III-a, IV-b", "B) I-d, II-a, III-c, IV-b", "C) I-a, II-d, III-c, IV-b", "D) I-a, II-c, III-d, IV-b"], c: 2},
+            {q: "SORU-22 (balik_besleme_ve_yem_teknolojisi.pdf): Yemlerin fiziksel (organoleptik) değerlendirmesi ile ilgili aşağıda verilen örnek durumlardan hangisi yanlıştır?", o: ["A) Mısırda yeşilimsi lekeler yemin küflendiğine işaret eder.", "B) Balık unundan yanık kokusu gelmesi, aşırı ısıl işleme maruz kaldığını gösterir.", "C) Hızlı bir ön eleme sağladığı için her zaman en kesin laboratuvar sindirilebilirlik sonucunu verir.", "D) Balık unundan ekşi koku gelmesi, kokuşma başladığını gösterir."], c: 2},
+            {q: "SORU-23 (balik_besleme_ve_yem_teknolojisi.pdf): Literatürde 'Weende Analizi' veya 'Proksimat Analiz' olarak bilinen kimyasal değerlendirme ile ilgili aşağıdaki ifadelerden hangisi yanlıştır?", o: ["A) Kuru madde, yemin suyunun uçurulmasıyla kalan kısmı ifade eder.", "B) Ham kül, inorganik mineral kısmı temsil eder.", "C) Yemin potansiyel besin sayısal verilerini sağlar.", "D) Yemin hedef hayvan tarafından tam olarak ne kadarının sindirilebileceğini tek başına kesin olarak gösterir."], c: 3},
+            {q: "SORU-24 (balik_besleme_ve_yem_teknolojisi.pdf): Küf mantarları tarafından üreyen 'Mikotoksinler' (özellikle Aflatoksin) neden insan sağlığı için de ciddi bir tehdit oluşturmaktadır?", o: ["A) Hayvan vücudunda parçalanarak doğrudan enerjiye dönüştükleri için", "B) Parçalanmayıp dokularda birikerek (biyoakümülasyon) et, süt yoluyla insan besin zincirine dahil oldukları için", "C) Sadece balık yemlerinde üreyip deniz suyuna karıştıkları için", "D) Yemlerin rengini ve kokusunu asla değiştirmedikleri için"], c: 1},
+            {q: "SORU-25 (balik_besleme_ve_yem_teknolojisi.pdf): Yemlerin biyoenerjetik kavramları incelendiğinde, aşağıdaki bileşen gruplarından hangisi hayvan vücudunda sindirildiğinde enerji (kalori) üretmez?", o: ["A) Sadece Proteinler", "B) Karbonhidratlar ve Lipitler", "C) Mineraller ve Su", "D) Sadece Lipitler (Yağlar)"], c: 2},
+            {q: "SORU-26 (balik_besleme_ve_yem_teknolojisi.pdf): Selüloz içeriği yüksek yonca otunun sığırlar için enerji değeri yüksek iken, balıklar için çok düşük olmasının temel nedeni aşağıdakilerden hangisidir?", o: ["A) Balıkların sindirim sisteminde selülozu parçalayacak enzim/mikroorganizmaların bulunmaması", "B) Sığırların balıklara göre daha büyük fiziksel mide hacmine sahip olması", "C) Yonca otunun suda tamamen çözünen bir yapıya sahip olması", "D) Balıkların doğası gereği sadece deniz suyundaki minerallerle beslenmesi"], c: 0},
+            {q: "SORU-27 (balik_besleme_ve_yem_teknolojisi.pdf): Ekstrüzyon gibi işleme teknolojilerinin yemin enerji değerini artıran temel biyokimyasal mekanizması aşağıdakilerden hangisidir?", o: ["A) Ham kül oranını artırarak yemin mineral değerini maksimuma çıkarması", "B) Basınç ve sıcaklıkla nişastanın jelatinize olmasını, böylece sindirme kapasitesinin artmasını sağlaması", "C) Proteinleri tamamen inorganik maddelere dönüştürmesi", "D) Yemin lezzetini yok ederek balıkların yemi daha yavaş tüketmesini sağlaması"], c: 1},
+            {q: "SORU-28 (balik_besleme_ve_yem_teknolojisi.pdf): Balık yemlerinde havanın oksijeni ile temas sonucu meydana gelen 'Ransidite' (acılaşma) olayının en büyük besinsel zararı aşağıdakilerden hangisidir?", o: ["A) Yemdeki ham selüloz oranını artırarak yemi sertleştirmesi", "B) E vitamini gibi esansiyel vitaminleri tahrip etmesi ve iştah kaybına neden olması", "C) Yemin su tutma kapasitesini artırması", "D) Proteinlerin miktarını iki katına çıkarması"], c: 1},
+            {q: "SORU-29 (balik_besleme_ve_yem_teknolojisi.pdf): Bitkisel hammaddelerdeki anti-nutrisyonel faktörleri eşleştiriniz.<br><br>I. Tripsin İnhibitörleri<br>II. Fitik Asit (Fitatlar)<br>III. Gossipol<br><br>a) Bağırsaklardaki protein sindirim enzimlerini bloke eder.<br>b) Pamuk tohumunda bulunan ve karaciğer hasarı yapan maddedir.<br>c) Fosforun bağlandığı formdur, minerallerin emilimini engeller.", o: ["A) I-b, II-a, III-c", "B) I-a, II-c, III-b", "C) I-c, II-b, III-a", "D) I-a, II-b, III-c"], c: 1},
+            {q: "SORU-30 (balik_besleme_ve_yem_teknolojisi.pdf): Yemlerde küf ve toksin (Aflatoksin) oluşumunu engellemek için rutubet oranının hangi güvenli sınırın altında tutulması kritik önem taşır?", o: ["A) %12", "B) %25", "C) %40", "D) %60"], c: 0},
+            {q: "SORU-31 (balik_besleme_ve_yem_teknolojisi.pdf): Soya fasulyesindeki zararlı tripsin inhibitörlerini pasif hale getirerek yemin besin değerini artıran temel sanayi işlemi aşağıdakilerden hangisidir?", o: ["A) Yemi dondurarak bekletmek", "B) Deniz suyu ile yıkayıp kurutmak", "C) Ekstrüzyon veya peletleme gibi yüksek sıcaklık ve basınç içeren 'ısıl işlemler' uygulamak", "D) Ekstra balık yağı ilave etmek"], c: 2},
+            {q: "SORU-32 (balik_besleme_ve_yem_teknolojisi.pdf): Çevresel faktörlerin yemin değerlendirilmesi üzerindeki etkisiyle ilgili aşağıdaki ifadelerden hangisi yanlıştır?", o: ["A) Balıkların sindirim hızı doğrudan su sıcaklığına bağlıdır.", "B) Sıcaklık optimum sınırların dışına çıktığında yem alımı durma noktasına gelir.", "C) Çözünmüş oksijen azaldığında yemin enerjiye dönüşümü düşer.", "D) Su sıcaklığı sürekli arttığında (kaynamaya yaklaşsa bile) sindirim enzimlerinin çalışma hızı sınırsızca artmaya devam eder."], c: 3},
+            {q: "SORU-33 (balik_besleme_ve_yem_teknolojisi.pdf): Aşağıdaki balık türlerinden hangisinin sindirim kanalında asit ve enzim salgılayan gerçek bir 'mide' bulunmaz?", o: ["A) Gökkuşağı Alabalığı", "B) Sazan", "C) Levrek", "D) Somon"], c: 1},
+            {q: "SORU-34 (balik_besleme_ve_yem_teknolojisi.pdf): Bağırsakların hemen başlangıcında yer alan, temel işlevi sindirim ve emilim yüzey alanını maksimuma çıkarmak olan balıklara özgü parmaksı kör bağırsak çıkıntılarına ne ad verilir?", o: ["A) Taşlık (Katı)", "B) Rumen (İşkembe)", "C) Pilorik Çekum", "D) Safra Kesesi"], c: 2},
+            {q: "SORU-35 (balik_besleme_ve_yem_teknolojisi.pdf): Aşağıdakilerden hangisi balık ununun rasyonlarda vazgeçilmez olmasının (altın standart) temel nedenlerinden biri değildir?", o: ["A) Lizin ve metiyonin gibi esansiyel amino asitler bakımından zengin olması", "B) İçerdiği uzun zincirli çoklu doymamış yağ asitleri ile enerji sağlaması", "C) Yüksek oranda ham selüloz içermesi sebebiyle bağırsak florasını düzenlemesi", "D) Cezbedici (attractant) özellik taşıması"], c: 2},
+            {q: "SORU-36 (balik_besleme_ve_yem_teknolojisi.pdf): Hayvansal protein kaynaklarını özellikleriyle eşleştiriniz.<br><br>I. Balık Unu<br>II. Et ve Kemik Unu<br>III. Kan Unu<br><br>a) 'İzolösin' bakımından fakir olan ve sprey kurutma yapılmazsa sindirilebilirliği düşen kaynaktır.<br>b) Amino asit dengesi mükemmel ve cezbedici özelliği yüksek olan standart hammaddedir.<br>c) İçerdiği yüksek kül (mineral) oranı nedeniyle kullanım yüzdesi kısıtlanması gereken kaynaktır.", o: ["A) I-b, II-a, III-c", "B) I-a, II-c, III-b", "C) I-b, II-c, III-a", "D) I-c, II-b, III-a"], c: 2},
+            {q: "SORU-37 (balik_besleme_ve_yem_teknolojisi.pdf): Et ve kemik ununun rasyonlara yüksek oranda katılmasının kısıtlanmasının en temel nedeni aşağıdakilerden hangisidir?", o: ["A) Sindirilebilir karbonhidrat oranının bitkisel yemlerden yüksek olması", "B) İçerdiği yüksek kemik oranından kaynaklanan aşırı kül (mineral) miktarının rasyonun inorganik madde dengesini bozması", "C) Suda hızlı çözünerek amonyak patlamasına yol açması", "D) İçerisinde tripsin inhibitörleri bulunması"], c: 1},
+            {q: "SORU-38 (balik_besleme_ve_yem_teknolojisi.pdf): Kan ununun balık yemlerinde kullanımı ile ilgili olarak aşağıdakilerden hangisi doğrudur?", o: ["A) Her şartta %100 sindirilebilirliğe sahiptir.", "B) Tek başına balık ununun tamamının yerini alabilir.", "C) Sadece tuzlu su etçil balıklarının beslenmesinde kullanılır.", "D) Ham protein oranı çok yüksek olmasına rağmen, izolösin gibi esansiyel amino asitler bakımından yetersiz bir kaynaktır."], c: 3},
+            {q: "SORU-39 (balik_besleme_ve_yem_teknolojisi.pdf): Mısır gluten ununun formülasyonlarda kullanılabilmesi için dışarıdan sentetik olarak takviye edilmesi zorunlu olan, eksikliği en çok hissedilen esansiyel amino asit aşağıdakilerden hangisidir?", o: ["A) İzolösin", "B) Lizin", "C) Metiyonin", "D) Triptofan"], c: 1},
+            {q: "SORU-40 (balik_besleme_ve_yem_teknolojisi.pdf): Biyoetanol üretimi yan ürünü olan 'DDGS'nin yüksek oranda kullanımı balıklarda kalite sorunlarına yol açmaktadır. Bu durumun temel nedeni aşağıdakilerden hangisidir?", o: ["A) İçerdiği çok yüksek 'Ksantofil' (sarı pigment) nedeniyle balık etinde istenmeyen sararmalara yol açması", "B) İçerdiği 'Gosipol' nedeniyle doğrudan karaciğer yetmezliği yapması", "C) Midede fermente olarak gaz oluşumuna (timpani) sebep olması", "D) Tamamen inorganik kül ve kemik parçalarından oluşması"], c: 0},
+            {q: "SORU-41 (balik_besleme_ve_yem_teknolojisi.pdf): Bitkisel protein kaynaklarını dezavantajlarıyla eşleştiriniz.<br><br>I. Pamuk Tohumu Küspesi<br>II. Ayçiçeği Tohumu Küspesi<br>III. Mısır DDGS<br><br>a) Ksantofil pigmenti sebebiyle ette sararma riski taşıması<br>b) Yüksek oranda ham selüloz ve tanen içermesi<br>c) Karaciğer hasarı yapan Gosipol içermesi", o: ["A) I-c, II-b, III-a", "B) I-a, II-b, III-c", "C) I-c, II-a, III-b", "D) I-b, II-c, III-a"], c: 0},
+            {q: "SORU-42 (balik_besleme_ve_yem_teknolojisi.pdf): Japon Pisi Balıklarının (Paralichthys olivaceus) rasyonlarında lizin takviyeli Mısır Gluten Unu balık ununun yerine hangi orana kadar başarılı şekilde ikame edilebilmiştir?", o: ["A) %10", "B) %40", "C) %75", "D) %100"], c: 1},
+            {q: "SORU-43 (balik_besleme_ve_yem_teknolojisi.pdf): Juvenil Çipura ile Sivriburunlu Çipura türleri için tespit edilen maksimum ayçiçeği küspesi tolerans oranları sırasıyla aşağıdakilerden hangisinde doğru verilmiştir?", o: ["A) Çipura için %10-12 / Sivriburunlu Çipura için %30", "B) Çipura için %30 / Sivriburunlu Çipura için %10-12", "C) Her iki tür için de standart olarak %50", "D) Her iki tür için de standart olarak %5"], c: 0},
+            {q: "SORU-44 (balik_besleme_ve_yem_teknolojisi.pdf): Pamuk tohumundaki toksik maddenin etkisini kırarak, alabalık yemlerinde %50 oranına kadar güvenle kullanılabilmesini sağlayan endüstriyel işlem aşağıdakilerden hangisidir?", o: ["A) Deniz suyuyla yıkayıp güneşte kurutma", "B) Solvent ekstraksiyon yöntemiyle tohumdaki yağın ve gosipolün yemi terk etmesinin sağlanması", "C) Yeme yüksek oranda sentetik ksantofil ilave edilmesi", "D) Yemin -18 derecede uzun süre dondurulması"], c: 1},
+            {q: "SORU-45 (balik_besleme_ve_yem_teknolojisi.pdf): Mısır DDGS'nin verimliliği incelendiğinde, bu hammadde hangi beslenme alışkanlığına sahip türlerde diğerlerine kıyasla çok daha başarılı sonuçlar vermektedir?", o: ["A) Sadece soğuk su isteyen etçil türlerde", "B) Hem bitkisel hem hayvansal beslenen hepçil (omnivor) türlerde (Örn: Nil Tilapyası)", "C) Sadece okyanusların derinliklerinde yaşayan yırtıcı türlerde", "D) Yalnızca midyesi olmayan kabuklu su canlılarında"], c: 1},
+            {q: "SORU-46 (balik_besleme_ve_yem_teknolojisi.pdf): Türkiye'nin dünya üretiminin %80'ini karşıladığı Fındık Küspesi'nin türlere göre araştırılan kullanım limitleri eşleştirmelerinden hangisi doğrudur?", o: ["A) Gökkuşağı Alabalığı (%50) - Koi Balığı (%15)", "B) Koi Balığı (%50) - Gökkuşağı Alabalığı (%15)", "C) Sazan (%50) - Gökkuşağı Alabalığı (%10)", "D) Koi Balığı (%100) - Sazan (%50)"], c: 1},
+            {q: "SORU-47 (balik_besleme_ve_yem_teknolojisi.pdf): Alternatif baklagiller olan bezelye konsantresi ile kırmızı mercimek unuyla ilgili araştırma bulgularını yansıtan doğru ifade aşağıdakilerden hangisidir?", o: ["A) Mercimek unu somonda %100 başarı sağlarken, bezelye alabalıkları zehirlemiştir.", "B) Her iki hammadde de hiçbir sentetik işlem görmeden doğrudan kullanılabilir.", "C) Bezelye somonda %20 başarı sağlarken; mercimek unu alabalıkta %30 oranında büyüme ve FCR'ı olumsuz etkilemiştir.", "D) Mercimek unu içerdiği gosipol nedeniyle sadece sazanlarda kullanılabilmektedir."], c: 2},
+            {q: "SORU-48 (balik_besleme_ve_yem_teknolojisi.pdf): Proteinin sadece büyüme için kullanılması, yaşama payı enerjisinin ise lipit ve karbonhidratlardan sağlanması stratejisine ne ad verilir?", o: ["A) Biyoakümülasyon Etkisi", "B) Proteinin Enerji Amaçlı Kullanımının Engellenmesi (Protein Sparing Effect)", "C) Karbonhidrat Zehirlenmesi", "D) Amino Asit Dengesizliği"], c: 1},
+            {q: "SORU-49 (balik_besleme_ve_yem_teknolojisi.pdf): Bitkisel proteinlerin handikaplarını ortadan kaldırmak için uygulanan teknolojik çözüm stratejileri arasında aşağıdakilerden hangisi yer almaz?", o: ["A) Sentetik 'Fitaz' enzimi ilave edilmesi", "B) Lezzeti artırmak için 'Atraktantlar' (cezbediciler) kullanılması", "C) Bitkilerden 'Konsantre Ürünler' elde edilmesi", "D) Tripsin inhibitörlerinin artırılması için yemin çiğ servis edilmesi"], c: 3},
+            {q: "SORU-50 (balik_besleme_ve_yem_teknolojisi.pdf): Bitkisel protein kaynaklarının kullanımını sınırlayan ortak biyo-kimyasal özelliklerden biri aşağıdakilerden hangisidir?", o: ["A) Sadece suda yaşayan bakteriler tarafından üretilebilmeleri", "B) İçerdikleri fosforun 'Fitat' formunda bağlı olması ve balıkların bu formu sindirememesi", "C) Hayvansal kaynaklara göre her zaman çok daha fazla lizin içermeleri", "D) Yüksek oranda balık yağı nedeniyle yanma riski taşımaları"], c: 1},
+            {q: "SORU-51 (balik_besleme_ve_yem_teknolojisi.pdf): Balığın pazar değerini belirleyen 'Karotenoid' pigmentlerinin senteziyle ilgili en kritik özellik aşağıdakilerden hangisidir?", o: ["A) Balıkların bu pigmentleri karaciğerlerinde sonsuz üretebilmesi", "B) Sadece deniz kabuklularının DNA'sına şifrelenmiş olmaları", "C) Balıkların bu maddeleri vücutlarında kesinlikle sentezleyememesi ve mutlaka yem yoluyla (dışarıdan) almak zorunda olması", "D) Yapısında inorganik mineraller barındırması"], c: 2},
+            {q: "SORU-52 (balik_besleme_ve_yem_teknolojisi.pdf): Pigment çeşitleri ve fizyolojik etkileri eşleştirildiğinde aşağıdakilerden hangisi yanlıştır?", o: ["A) Melanin - Siyah rengi veren pigmenttir.", "B) Pürin (Guanin) - Karın bölgesindeki gümüşi-beyaz parlaklığı sağlar.", "C) Karotenoid - Sarı, turuncu ve kırmızı renkleri veren dominant pigmenttir.", "D) Pteridin - Sadece kemik dokusunda birikerek kemik erimesine karşı koruyan inorganik mineraldir."], c: 3},
+            {q: "SORU-53 (balik_besleme_ve_yem_teknolojisi.pdf): Balık yemlerine renk vermek amacıyla katılan karotenoid kaynakları ve içerdikleri spesifik pigmentler eşleştirildiğinde aşağıdakilerden hangisi yanlıştır?", o: ["A) Krill Unu ve Kerevit Ekstraktı - Astaksantin kaynağıdır.", "B) Kırmızı Biber Unu - Kapsantin ve Kapsorubin kaynağıdır.", "C) Mısır Gluten Unu ve Kadife Çiçeği - Lutein ve Zeaksantin kaynağıdır.", "D) Spirulina ve Kırmızı Maya - Sadece inorganik kalsiyum kaynağıdır, pigment içermezler."], c: 3},
+            {q: "SORU-54 (balik_besleme_ve_yem_teknolojisi.pdf): Balık yemlerinin nem oranlarına göre sınıflandırmasıyla ilgili aşağıdaki eşleştirmelerden hangisi yanlıştır?", o: ["A) Kuru Yemler: Nem oranı %6-10 arasındadır.", "B) Yaş Yemler: Nem oranı %45-70 arasındadır.", "C) Nemli Yemler: Nem oranı %18-40 arasındadır, 'Hamur/Top' şeklindedir.", "D) Toz Yemler: Nem oranı her zaman %90'ın üzerindedir ve sıvı olarak verilir."], c: 3},
+            {q: "SORU-55 (balik_besleme_ve_yem_teknolojisi.pdf): Aşağıdakilerden hangisi ekstrüzyon teknolojisinin balık yemi üretiminde sağladığı avantajlardan biri değildir?", o: ["A) Nişastayı %80 oranında jelatinize ederek sindirilebilirliği artırması", "B) Hava cepleri oluşturarak yemin suda yüzmesini (floating) sağlaması", "C) Yüksek ısıyla Salmonella ve anti-nutrisyonel faktörleri etkisiz kılması", "D) Proteinleri tamamen inorganik küle çevirerek yemin enerji değerini sıfıra indirmesi"], c: 3},
+            {q: "SORU-56 (balik_besleme_ve_yem_teknolojisi.pdf): Balıkların büyüme evresi yemlerini eşleştiriniz.<br><br>I. Başlatma Yemi (Starter)<br>II. Yavru Yemi (Fry)<br>III. Besi Yemi (Grower)<br>IV. Damızlık Yemi<br><br>a) En fazla yem tüketiminin olduğu dönemdir.<br>b) Larvanın ilk beslendiği, mikronize boyuttaki yemdir.<br>c) Yumurta kalitesi için E ve C vitamini takviyeli yemdir.<br>d) Ağırlık artışının en hızlı olduğu 'Crumble' formundaki yemdir.", o: ["A) I-b, II-d, III-a, IV-c", "B) I-d, II-b, III-c, IV-a", "C) I-c, II-a, III-d, IV-b", "D) I-a, II-c, III-b, IV-d"], c: 0},
+            {q: "SORU-57 (balik_besleme_ve_yem_teknolojisi.pdf): Yem Dönüşüm Oranı (FCR) ile ilgili, doğal ekosistem ve kültür ortamı karşılaştırmalarından hangisi doğrudur?", o: ["A) Doğada 1 kg ağırlık için 5-10 kg canlı yem tüketilirken, kültürde modern ekstrüde yemlerle bu oran 0.9 - 1.4 kg'a kadar düşmüştür.", "B) Kültür koşullarında FCR değeri, doğadaki balıklara göre her zaman daha kötüdür.", "C) Yavru yemlerinin kilogram maliyeti, besi yemlerine göre daha ucuzdur.", "D) Çipura ve Levrek doğada otçul oldukları için FCR hesaplanamaz."], c: 0},
+            {q: "SORU-58 (balik_besleme_ve_yem_teknolojisi.pdf): Aşağıdaki hammadde ve uygulanan Kalite Kontrol analizi eşleştirmelerinden hangisi yanlıştır?", o: ["A) Mısır - Aflatoksin analizi", "B) Soya Küspesi - Yetersiz pişirmeyi gösteren 'Üreaz Aktivitesi' analizi", "C) Balık Unu - 'Taşlık Erozyon Faktörü' analizi", "D) Yağlar - Sadece rengini ölçen 'Ksantofil' analizi"], c: 3},
+            {q: "SORU-59 (balik_besleme_ve_yem_teknolojisi.pdf): Öğütme Teknolojisi ile ilgili aşağıdaki ifadelerden hangisi yanlıştır?", o: ["A) Fabrikada harcanan elektriğin %55-75'ini öğütme işlemi oluşturur.", "B) Temel amaç sindirim enzimlerinin yüzey alanını genişletmektir.", "C) Yem aşırı ince öğütülürse, bağırsaktan geçiş hızı o kadar yavaşlar ve sindirim %100 olur.", "D) Aşırı ince öğütme, yemin sindirilmeden atılmasına (kayba) neden olabilir."], c: 2},
+            {q: "SORU-60 (balik_besleme_ve_yem_teknolojisi.pdf): 'Su Stabilitesi Testi'nin aşamaları aşağıdakilerin hangisinde doğru ve sırasıyla verilmiştir?", o: ["A) İnkübasyon - Kurutma - Tartım - Son Tartım", "B) Tartım - İnkübasyon (suya daldırma) - Kurutma (etüv) - Son Tartım (desikatör)", "C) Kurutma - İnkübasyon - Tartım - Son Tartım", "D) Tartım - Son Tartım - İnkübasyon - Kurutma"], c: 1},
+            {q: "SORU-61 (balik_besleme_ve_yem_teknolojisi.pdf): '10 g Yemdeki Kayıp (g)' miktarını kuru madde üzerinden bulmaya yarayan doğru hesaplama formülü aşağıdakilerden hangisidir?", o: ["A) [(Yem_son) - (Yem Miktarı + Nem)]", "B) [(Yem Miktarı - Nem) + Yem_son]", "C) [(Yem Miktarı + Nem) / Yem_son]", "D) [(Yem Miktarı - Nem) - Yem_son]"], c: 3},
+            {q: "SORU-62 (balik_besleme_ve_yem_teknolojisi.pdf): Ekstrüzyon işleminin başarısını ve peletin fiziksel kalitesini takip etmek için kullanılan temel parametre ikilisi aşağıdakilerden hangisidir?", o: ["A) Aflatoksin Oranı ve Taşlık Erozyon İndeksi", "B) Üreaz Aktivitesi ve Serbest Yağ Asidi Değeri", "C) Dökme Yoğunluğu (Bulk Density) ve Su ile Etkileşim İndeksleri (WAI/WSI)", "D) Ham Selüloz Oranı ve Fitik Asit İndeksi"], c: 2},
+            {q:"SORU-63: Hayvanların doğru ve dengeli beslenmesinin zootekni bilimi açısından temel amacı aşağıdakilerden hangisidir?",o:["A) Yalnızca yem tüketimini artırmak","B) Maksimum verim ve ekonomik optimizasyon sağlamak","C) Hayvanların doğal davranışlarını değiştirmek","D) Yalnızca hastalıkları tedavi etmek"],c:1},
+            {q:"SORU-64: Ticari hayvancılık işletmelerinde toplam giderlerin büyük kısmını hangisi oluşturur?",o:["A) İşçilik","B) İlaç","C) Yem maliyetleri","D) Nakliye"],c:2},
+            {q:"SORU-65: Yem maddesinin tanımında olması gereken özellik hangisidir?",o:["A) Ucuz olması","B) Sınırsız verilmesi","C) Zararsız olması","D) Sadece protein içermesi"],c:2},
+            {q:"SORU-66: Yem hammaddeleri neden sınırsız kullanılmaz?",o:["A) Pahalıdır","B) Toksik/antinutrisyonel etkiler","C) Sadece geviş getirenler","D) Su içerir"],c:1},
+            {q:"SORU-67: Akuakültür nedir?",o:["A) Avcılık","B) Kontrollü üretim","C) Satış","D) Yem üretimi"],c:1},
+            {q:"SORU-68: Hangisi yetiştiricilik sistemi değildir?",o:["A) Kuluçka","B) Besicilik","C) Komple","D) Serbest otlatma"],c:3},
+            {q:"SORU-69: Balıkların besin değeri neden yüksektir?",o:["A) Selüloz","B) Omega-3","C) Ucuzluk","D) Karasal"],c:1},
+            {q:"SORU-70: Düşük FCR nedeni nedir?",o:["A) Hareket","B) Soğukkanlılık","C) Oksijen","D) Sindirim"],c:1},
+            {q:"SORU-71: Enerji tasarrufu nereye gider?",o:["A) Isı","B) Tüy","C) Büyüme","D) Göç"],c:2},
+            {q:"SORU-72: Soğuk su balığı hangisi?",o:["A) Sazan","B) Yayın","C) Alabalık","D) Kefal"],c:2},
+            {q:"SORU-73: Yetiştiriciliğe geçiş nedeni?",o:["A) Azalma","B) Talep","C) Yasak","D) Su"],c:1},
+            {q:"SORU-74: Tüketim artışı nedeni?",o:["A) Nişasta","B) Omega-3","C) Renk","D) Boyut"],c:1},
+
+            {q:"SORU-75: Protein görevi?",o:["A) Enerji","B) Doku","C) Renk","D) Su"],c:1},
+            {q:"SORU-76: Protein yapı taşı?",o:["A) Yağ","B) Amino asit","C) Glikoz","D) Mineral"],c:1},
+            {q:"SORU-77: Esansiyel amino asit?",o:["A) Üretilir","B) Yemle alınır","C) Enerji","D) Sindirilemez"],c:1},
+            {q:"SORU-78: Enerji yoksa?",o:["A) Yağ","B) Protein kullanılır","C) Vitamin","D) Mineral"],c:1},
+
+            {q:"SORU-79: Protein sindirimi sonucu?",o:["A) Yağ","B) Amino asit","C) Vitamin","D) Glikoz"],c:1},
+            {q:"SORU-80: Protein kalitesini belirleyen?",o:["A) Renk","B) Amino asit dengesi","C) Su","D) Lif"],c:1},
+            {q:"SORU-81: Biyolojik değer nedir?",o:["A) Fiyat","B) Kullanım oranı","C) Süre","D) Enerji"],c:1},
+            {q:"SORU-82: Yüksek protein kaynağı?",o:["A) Selüloz","B) Balık unu","C) Su","D) Kum"],c:1},
+            {q:"SORU-83: Sindirilebilirlik düşükse?",o:["A) Artar","B) Azalır","C) Enerji","D) Vitamin"],c:1},
+
+            {q:"SORU-84: Yağların özelliği?",o:["A) Düşük enerji","B) Yüksek enerji","C) Sindirilemez","D) Protein"],c:1},
+            {q:"SORU-85: Esansiyel yağ asidi?",o:["A) Sentezlenmez","B) Enerji","C) Zararlı","D) Sindirilmez"],c:0},
+            {q:"SORU-86: Lipit görevi?",o:["A) DNA","B) Hücre zarı","C) Su","D) Vitamin"],c:1},
+
+            {q:"SORU-87: Karbonhidrat kullanımı?",o:["A) Sınırsız","B) Yok","C) Sınırlı","D) Protein yerine"],c:2},
+            {q:"SORU-88: Karbonhidrat görevi?",o:["A) Enerji","B) Protein","C) Vitamin","D) Mineral"],c:0},
+
+            {q:"SORU-89: Vitamin görevi?",o:["A) Enerji","B) Düzenleyici","C) Protein","D) Yağ"],c:1},
+            {q:"SORU-90: Mineral görevi?",o:["A) Enerji","B) Yapısal/metabolik","C) Sindirim","D) Vitamin"],c:1},
+
+            {q:"SORU-91: Yem formülasyonu amacı?",o:["A) Rastgele","B) Denge","C) Protein","D) Maliyet"],c:1},
+            {q:"SORU-92: Hammadde seçiminde önemli?",o:["A) Renk","B) Besin","C) Şekil","D) Koku"],c:1},
+
+            {q:"SORU-93: Yem üretim ilk aşama?",o:["A) Paket","B) Öğütme","C) Satış","D) Depo"],c:1},
+            {q:"SORU-94: Peletleme amacı?",o:["A) Yok etmek","B) Şekil","C) Kurutma","D) Azaltma"],c:1},
+
+            {q:"SORU-95: Protein sindirimi süreci?",o:["A) Mekanik","B) Enzimatik","C) Fermentasyon","D) Foto"],c:1},
+            {q:"SORU-96: Protein kalite düşerse?",o:["A) Artar","B) Dengesizlik","C) Enerji","D) Vitamin"],c:1},
+            {q:"SORU-97: Protein kriter değil?",o:["A) Sindirim","B) AA","C) Biyolojik","D) Renk"],c:3},
+            {q:"SORU-98: Yüksek biyolojik değer?",o:["A) Az","B) Dengeli","C) Yok","D) Enerji"],c:1},
+
+            {q:"SORU-99: Enerji yoksa?",o:["A) Vitamin","B) Mineral","C) Protein","D) Su"],c:2},
+            {q:"SORU-100: Enerji avantajı?",o:["A) Uçma","B) Sabit ısı","C) Soğukkanlı","D) Uzun"],c:2},
+
+            {q:"SORU-101: Yağ asidi eksikliği?",o:["A) Normal","B) Bozukluk","C) Su","D) Protein"],c:1},
+            {q:"SORU-102: Karbonhidrat fazla?",o:["A) Artar","B) Düşer","C) Protein","D) Mineral"],c:1},
+
+            {q:"SORU-103: Vitamin eksikliği?",o:["A) Enerji","B) Bozukluk","C) Yağ","D) Protein"],c:1},
+            {q:"SORU-104: Mineral eksikliği?",o:["A) Yapısal","B) Sindirim","C) Solunum","D) Dolaşım"],c:0},
+
+            {q:"SORU-105: Kritik denge?",o:["A) Renk","B) Protein-enerji","C) Su","D) Koku"],c:1},
+            {q:"SORU-106: Hammadde seçim?",o:["A) Görünüm","B) Besin","C) Paket","D) Marka"],c:1},
+
+            {q:"SORU-107: Pelet avantaj?",o:["A) Zor","B) Kayıp azaltır","C) Protein yok","D) Su"],c:1},
+            {q:"SORU-108: Karıştırma amacı?",o:["A) Ayırma","B) Homojen","C) Isı","D) Nem"],c:1},
+
+            {q:"SORU-109: Öğütme amacı?",o:["A) Renk","B) Küçültme","C) Vitamin","D) Protein"],c:1},
+            {q:"SORU-110: Yem aşaması değil?",o:["A) Öğütme","B) Karıştırma","C) Pelet","D) Fotosentez"],c:3}
+        ];
+
+        let currentQuestions = [...quizData];
+        let currentQuestionIndex = 0;
+
+        const questionEl = document.getElementById('question');
+        const optionsEl = document.getElementById('options');
+        const nextBtn = document.getElementById('nextBtn');
+        const statusEl = document.getElementById('status');
+
+        function loadQuestion() {
+            nextBtn.style.display = 'none';
+            optionsEl.innerHTML = '';
+            
+            const q = currentQuestions[currentQuestionIndex];
+            // Metnin içindeki <br> gibi HTML etiketlerinin çalışması için textContent yerine innerHTML kullanıldı.
+            questionEl.innerHTML = q.q;
+
+            q.o.forEach((opt, index) => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn';
+                btn.innerHTML = opt; // Şıklardaki formatlamalar için
+                btn.onclick = () => selectOption(btn, index, q.c);
+                optionsEl.appendChild(btn);
+            });
+
+            statusEl.textContent = `Soru: ${currentQuestionIndex + 1} / ${currentQuestions.length}`;
+            window.scrollTo(0, 0); 
+        }
+
+        function selectOption(btn, selectedIndex, correctIndex) {
+            const buttons = optionsEl.querySelectorAll('button');
+            
+            buttons.forEach(b => b.disabled = true);
+
+            if (selectedIndex === correctIndex) {
+                btn.classList.add('correct');
+            } else {
+                btn.classList.add('wrong');
+                buttons[correctIndex].classList.add('correct');
+                
+                let currentQ = currentQuestions[currentQuestionIndex];
+                let insertIndex = currentQuestionIndex + 6; 
+                
+                if (insertIndex >= currentQuestions.length) {
+                    currentQuestions.push(currentQ);
+                } else {
+                    currentQuestions.splice(insertIndex, 0, currentQ);
+                }
+            }
+            nextBtn.style.display = 'block';
+            
+            setTimeout(() => {
+                nextBtn.scrollIntoView({ behavior: "smooth", block: "nearest" });
+            }, 100);
+        }
+
+        function nextQuestion() {
+            currentQuestionIndex++;
+            if (currentQuestionIndex >= currentQuestions.length) {
+                alert("Tebrikler! Tüm soruları doğru bir şekilde tamamladınız.");
+                questionEl.textContent = "🏆 Sınav Başarıyla Tamamlandı!";
+                optionsEl.innerHTML = "";
+                nextBtn.style.display = 'none';
+                statusEl.textContent = "Sınav Bitti";
+            } else {
+                loadQuestion();
+            }
+        }
+
+        loadQuestion();
+    </script>
+</body>
+</html>
